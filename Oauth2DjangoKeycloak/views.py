@@ -32,13 +32,13 @@ def redirect_login(request):
         Redirecting users towards authentication Keycloak backend
         and creating sessions for further validation.
     """
-
+    print('redirect_login')
     client_id = settings.KEYCLOAK_CLIENT_ID
     base_authorize_url = settings.KEYCLOAK_AUTHORIZE_URL
     redirect_uri = request.build_absolute_uri(reverse('callback'))
     if 'next' in request.GET:
         redirect_uri += "?next=" + quote(request.GET['next'])
-    
+
 
     oauth2_session = OAuth2Session(
         client_id, scope='openid email profile', redirect_uri=redirect_uri)
@@ -49,6 +49,7 @@ def redirect_login(request):
     # later validation (see authentication.py)
     request.session['OAUTH2_STATE'] = state
     request.session['OAUTH2_REDIRECT_URI'] = redirect_uri
+    print('redirect_login done: %s', redirect_uri)
     return redirect(authorization_url)
 
 
@@ -56,10 +57,15 @@ def callback(request):
     """
         Enable redirect to /protected/ after successful login
     """
+    print('callback')
     try:
         user = authenticate(request=request)
+        print('callback authenticate')
         login(request, user)
+        print('callback login')
         next_url = request.GET.get('next', settings.LOGIN_REDIRECT_URL) # redirects to /protected/
+        print('callback, redirect_url %s', settings.LOGIN_REDIRECT_URL)
+        print('callback, next_url: %s', next_url)
         return redirect(next_url)
     except Exception as err:
         logger.exception("An error occurred while processing OAuth2 "

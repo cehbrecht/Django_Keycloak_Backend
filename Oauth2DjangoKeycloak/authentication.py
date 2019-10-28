@@ -12,7 +12,7 @@ class KeycloakBackend(object):
     """Integrating Django with Keycloak using OpenID Connect (OIDC)"""
 
     def __init__(self):
-        self.verify = True
+        self.verify = False
         if hasattr(settings, 'SSL_VERIFY'):
             self.verify = settings.SSL_VERIFY
 
@@ -26,6 +26,7 @@ class KeycloakBackend(object):
             an exception, it returns None
 
         """
+        print('authenticate')
         try:
             token = self._redirection(request)
             userinfo = self._handle_token(token)
@@ -40,7 +41,7 @@ class KeycloakBackend(object):
             This method is only ever called after successful validation.
 
         """
-
+        print('get_user')
         try:
             return User.objects.get(pk=user_id)
         except User.DoesNotExist:
@@ -53,7 +54,7 @@ class KeycloakBackend(object):
         :param request:
         :return: token
         """
-
+        print('redirection')
         authorization_code_url = request.build_absolute_uri()
         print('-----', authorization_code_url)
         client_id = settings.KEYCLOAK_CLIENT_ID
@@ -66,7 +67,7 @@ class KeycloakBackend(object):
                                        scope='openid email profile',
                                        redirect_uri=redirect_uri,
                                        state=state)
-        
+
 
         token = oauth2_session.fetch_token(token_url,
                                            client_secret=client_secret,
@@ -79,13 +80,13 @@ class KeycloakBackend(object):
     def _handle_token(self, token):
         """
             Sends an access token obtained in '_redirection' method to the resource server
-            django app. The resource server validates the token and sends appropriate 
+            django app. The resource server validates the token and sends appropriate
             response back which is then handled.
 
         :param token:
         :return: username
         """
-
+        print('handle_token')
         token = token['access_token']
         headers = {
             'Authorization': 'Bearer {}'.format(token)
@@ -93,9 +94,10 @@ class KeycloakBackend(object):
         # Firstly, send token towards the resource server
         # Secondly, extract headers from response sent by the server
 
-        response = requests.get('https://localhost:8001/verify', headers=headers, verify=self.verify).headers
+        response = requests.get('http://localhost:8001/verify', headers=headers, verify=self.verify).headers
 
         convert_to_json = json.loads(response['user_info'])
+        print('user info: %s', convert_to_json)
         username = convert_to_json['preferred_username']
         return username
 
@@ -106,7 +108,7 @@ class KeycloakBackend(object):
         :param userinfo:
         :return: user
         """
-
+        print('handle_userinfo')
         username = userinfo
         try:
             user = User.objects.get(username=username)

@@ -128,11 +128,12 @@ AUTHENTICATION_BACKENDS = [
 LOGIN_URL = 'login'
 # Keycloak settings
 KEYCLOAK_CLIENT_ID = 'test'
-KEYCLOAK_CLIENT_SECRET = '16d48eb8-0e38-4e9a-95f2-f6fba2556380'
-KEYCLOAK_AUTHORIZE_URL = 'https://keycloak.ceda.ac.uk/auth/realms/master/protocol/openid-connect/auth'
-KEYCLOAK_TOKEN_URL = 'https://keycloak.ceda.ac.uk/auth/realms/master/protocol/openid-connect/token'
+KEYCLOAK_CLIENT_SECRET = 'bd6fea64-2588-4707-8611-922b5d3f47da'
+KEYCLOAK_AUTHORIZE_URL = 'http://localhost:8080/auth/realms/demo/protocol/openid-connect/auth'
+KEYCLOAK_TOKEN_URL = 'http://localhost:8080/auth/realms/demo/protocol/openid-connect/token'
 SSL_VERIFY = False
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False
+LOGIN_REDIRECT_URL = '/protected'
 
 LOGGING = {
     'version': 1,
